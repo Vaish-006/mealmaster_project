@@ -1,0 +1,19 @@
+// Alternative for testing - replace the generateOtp method in OtpService.java
+public String generateOtp(String email) {
+    String otp = String.format("%06d", new Random().nextInt(999999));
+    LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(5);
+    
+    // Delete existing OTPs for this email
+    otpRepository.deleteByEmail(email);
+    
+    OtpVerification otpVerification = new OtpVerification(email, otp, expiryTime);
+    otpRepository.save(otpVerification);
+    
+    // For testing - print OTP to console
+    System.out.println("=== OTP FOR TESTING ===");
+    System.out.println("Email: " + email);
+    System.out.println("OTP: " + otp);
+    System.out.println("======================");
+    
+    return otp;
+}
