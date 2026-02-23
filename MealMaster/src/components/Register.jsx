@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Button, Form, Container } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { Button, Form, Container, Card, Row, Col, ProgressBar } from "react-bootstrap";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from "../auth/useAuth";
+import { MdOutlineFoodBank } from "react-icons/md";
 
 // Validation regex patterns
 const VALIDATION_PATTERNS = {
@@ -27,6 +27,7 @@ const VALIDATION_MESSAGES = {
   state: "State must contain only letters and spaces (2-30 characters)",
   addressLine: "Address must be 5-100 characters with letters, numbers, spaces and basic punctuation"
 };
+
 function Register() {
   const navigate = useNavigate();
   const { register } = useAuth();
@@ -45,15 +46,23 @@ function Register() {
     pincode: "",
     otp: ""
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const validateField = (field, value) => {
+    if (!value.trim()) return `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+    if (VALIDATION_PATTERNS[field] && !VALIDATION_PATTERNS[field].test(value.trim())) return VALIDATION_MESSAGES[field];
+    return null;
+  };
+
   const sendOtp = async () => {
     const emailError = validateField('email', formData.email);
     if (emailError) return toast.error(emailError);
-
+    
+    setLoading(true);
     try {
       const response = await fetch('http://localhost:9090/api/auth/send-otp', {
         method: 'POST',
@@ -71,6 +80,8 @@ function Register() {
       }
     } catch (err) {
       toast.error('Failed to send OTP');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -79,6 +90,7 @@ function Register() {
       return toast.error('OTP must be 6 digits');
     }
 
+    setLoading(true);
     try {
       const response = await fetch('http://localhost:9090/api/auth/verify-otp', {
         method: 'POST',
@@ -95,13 +107,9 @@ function Register() {
       }
     } catch (err) {
       toast.error('OTP verification failed');
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const validateField = (field, value) => {
-    if (!value.trim()) return `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
-    if (!VALIDATION_PATTERNS[field].test(value.trim())) return VALIDATION_MESSAGES[field];
-    return null;
   };
 
   const handleRegister = async (e) => {
@@ -114,6 +122,7 @@ function Register() {
       if (error) return toast.error(error);
     }
 
+    setLoading(true);
     try {
       const payload = {
         name: formData.name,
@@ -133,155 +142,224 @@ function Register() {
       else navigate("/user/dashboard");
     } catch (err) {
       toast.error(err?.message || "Registration failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <Container className="mt-5">
-      <h2>Register - Step {step} of 3</h2>
+    <div className="d-flex align-items-center justify-content-center flex-grow-1 bg-light py-5">
+      <Container>
+        <Row className="justify-content-center">
+          <Col md={10} lg={8} xl={6}>
+            <div className="text-center mb-4">
+              <MdOutlineFoodBank size={48} className="text-primary-custom mb-2" />
+              <h2 className="fw-bold">Create an Account</h2>
+              <p className="text-muted">Join MealMaster today</p>
+            </div>
+            
+            <Card className="border-0 shadow-custom">
+              <Card.Header className="bg-white border-0 pt-4 pb-0">
+                 <div className="px-4">
+                   <div className="d-flex justify-content-between mb-2 text-muted small fw-bold">
+                     <span>Email</span>
+                     <span>Verify</span>
+                     <span>Details</span>
+                   </div>
+                   <ProgressBar 
+                    now={(step / 3) * 100} 
+                    variant="success" 
+                    className="mb-2" 
+                    style={{ height: '6px' }} 
+                   />
+                 </div>
+              </Card.Header>
+              <Card.Body className="p-4 p-md-5">
+                {step === 1 && (
+                  <Form onSubmit={(e) => { e.preventDefault(); sendOtp(); }}>
+                    <h4 className="mb-3">Let's start with your email</h4>
+                    <Form.Group className="mb-4">
+                      <Form.Label>Email Address</Form.Label>
+                      <Form.Control
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                        placeholder="Enter your email"
+                        className="form-control-lg"
+                      />
+                    </Form.Group>
+                    <Button 
+                      onClick={sendOtp} 
+                      variant="primary-custom" 
+                      className="w-100 btn-lg"
+                      disabled={loading}
+                    >
+                      {loading ? "Sending OTP..." : "Continue"}
+                    </Button>
+                  </Form>
+                )}
 
-      {step === 1 && (
-        <Form>
-          <Form.Group className="mb-3">
-            <Form.Label>Email</Form.Label>
-            <Form.Control
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <Button onClick={sendOtp}>Send OTP</Button>
-        </Form>
-      )}
+                {step === 2 && (
+                  <Form onSubmit={(e) => { e.preventDefault(); verifyOtp(); }}>
+                    <h4 className="mb-3">Verify your email</h4>
+                    <p className="text-muted mb-4">We sent a 6-digit code to <strong>{formData.email}</strong></p>
+                    <Form.Group className="mb-4">
+                      <Form.Label>Enter OTP</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="otp"
+                        value={formData.otp}
+                        onChange={handleChange}
+                        maxLength="6"
+                        placeholder="000000"
+                        required
+                        className="form-control-lg text-center letter-spacing-2"
+                        style={{ letterSpacing: '0.5em', fontSize: '1.5rem' }}
+                      />
+                    </Form.Group>
+                    <Button 
+                      onClick={verifyOtp} 
+                      variant="primary-custom" 
+                      className="w-100 btn-lg mb-3"
+                      disabled={loading}
+                    >
+                      {loading ? "Verifying..." : "Verify OTP"}
+                    </Button>
+                    <Button variant="link" className="w-100 text-decoration-none text-muted" onClick={() => setStep(1)}>
+                      Change Email
+                    </Button>
+                  </Form>
+                )}
 
-      {step === 2 && (
-        <Form>
-          <Form.Group className="mb-3">
-            <Form.Label>Enter OTP sent to {formData.email}</Form.Label>
-            <Form.Control
-              type="text"
-              name="otp"
-              value={formData.otp}
-              onChange={handleChange}
-              maxLength="6"
-              placeholder="Enter 6-digit OTP"
-              required
-            />
-          </Form.Group>
-          <Button onClick={verifyOtp} className="me-2">Verify OTP</Button>
-          <Button variant="secondary" onClick={() => setStep(1)}>Back</Button>
-        </Form>
-      )}
+                {step === 3 && (
+                  <Form onSubmit={handleRegister}>
+                    <h4 className="mb-4">Complete your profile</h4>
+                    
+                    <Row>
+                      <Col md={6}>
+                        <Form.Group className="mb-3">
+                          <Form.Label>Account Type</Form.Label>
+                          <Form.Select name="role" value={formData.role} onChange={handleChange} className="form-select-lg">
+                            <option value="User">User</option>
+                            <option value="Vendor">Vendor</option>
+                            <option value="Admin">Admin</option>
+                          </Form.Select>
+                        </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                        <Form.Group className="mb-3">
+                          <Form.Label>Full Name</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            required
+                          />
+                        </Form.Group>
+                      </Col>
+                    </Row>
 
-      {step === 3 && (
-        <Form onSubmit={handleRegister}>
-        <Form.Group className="mb-3">
-          <Form.Label>Role</Form.Label>
-          <Form.Select name="role" value={formData.role} onChange={handleChange}>
-            <option value="User">User</option>
-            <option value="Vendor">Vendor</option>
-            <option value="Admin">Admin</option>
-          </Form.Select>
-        </Form.Group>
+                    <Row>
+                      <Col md={6}>
+                        <Form.Group className="mb-3">
+                          <Form.Label>Mobile Number</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="mobile"
+                            value={formData.mobile}
+                            onChange={handleChange}
+                            required
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                        <Form.Group className="mb-3">
+                          <Form.Label>Password</Form.Label>
+                          <Form.Control
+                            type="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            required
+                          />
+                        </Form.Group>
+                      </Col>
+                    </Row>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Name</Form.Label>
-          <Form.Control
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-        </Form.Group>
+                    <h5 className="mt-4 mb-3 border-bottom pb-2">Address Details</h5>
+                    
+                    <Form.Group className="mb-3">
+                      <Form.Label>Address Line</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="addressLine"
+                        value={formData.addressLine}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Email</Form.Label>
-          <Form.Control
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </Form.Group>
+                    <Row>
+                      <Col md={4}>
+                        <Form.Group className="mb-3">
+                          <Form.Label>City</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="city"
+                            value={formData.city}
+                            onChange={handleChange}
+                            required
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={4}>
+                        <Form.Group className="mb-3">
+                          <Form.Label>State</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="state"
+                            value={formData.state}
+                            onChange={handleChange}
+                            required
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={4}>
+                        <Form.Group className="mb-3">
+                          <Form.Label>Pincode</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="pincode"
+                            value={formData.pincode}
+                            onChange={handleChange}
+                            required
+                          />
+                        </Form.Group>
+                      </Col>
+                    </Row>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Mobile</Form.Label>
-          <Form.Control
-            type="text"
-            name="mobile"
-            value={formData.mobile}
-            onChange={handleChange}
-            required
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label>Password</Form.Label>
-          <Form.Control
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label>Address Line</Form.Label>
-          <Form.Control
-            type="text"
-            name="addressLine"
-            value={formData.addressLine}
-            onChange={handleChange}
-            required
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label>City</Form.Label>
-          <Form.Control
-            type="text"
-            name="city"
-            value={formData.city}
-            onChange={handleChange}
-            required
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label>State</Form.Label>
-          <Form.Control
-            type="text"
-            name="state"
-            value={formData.state}
-            onChange={handleChange}
-            required
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label>Pincode</Form.Label>
-          <Form.Control
-            type="text"
-            name="pincode"
-            value={formData.pincode}
-            onChange={handleChange}
-            required
-          />
-        </Form.Group>
-
-        <Button type="submit">Register</Button>
-        <Button variant="secondary" onClick={() => setStep(2)} className="ms-2">Back</Button>
-        <p className="mt-3">
-          Already registered? <Link to="/login">Login</Link>
-        </p>
-        </Form>
-      )}
-    </Container>
+                    <div className="d-grid gap-2 mt-4">
+                      <Button type="submit" variant="primary-custom" size="lg" disabled={loading}>
+                        {loading ? "Creating Account..." : "Create Account"}
+                      </Button>
+                      <Button variant="outline-secondary" onClick={() => setStep(2)}>Back</Button>
+                    </div>
+                  </Form>
+                )}
+              </Card.Body>
+              <Card.Footer className="bg-white text-center py-3 border-0">
+                <p className="mb-0 text-muted">
+                  Already registered? <Link to="/login" className="text-primary-custom fw-semibold text-decoration-none">Login here</Link>
+                </p>
+              </Card.Footer>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+    </div>
   );
 }
 

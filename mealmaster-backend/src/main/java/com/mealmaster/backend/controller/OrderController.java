@@ -41,6 +41,8 @@ public class OrderController {
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
+            System.out.println("Creating order for user: " + user.getId() + " (" + email + ")");
+
             com.mealmaster.backend.entity.Subscription subscription = subscriptionRepository
                     .findById(request.getSubscriptionId())
                     .orElseThrow(() -> new RuntimeException("Subscription not found"));
@@ -57,17 +59,23 @@ public class OrderController {
                 return ResponseEntity.badRequest().body("Invalid duration. Must be 7, 15, or 30 days.");
             }
 
+            System.out.println("Processing order for: " + email);
+            System.out.println("Request Coords: Lat=" + request.getLatitude() + ", Lng=" + request.getLongitude());
+
             Order order = new Order();
-            order.setUser(user);
+            order.setUser(user); // Ensure user is set first
             order.setSubscription(subscription);
             order.setDuration(request.getDurationDays());
             order.setAmount(price); // Use server-calculated price
             order.setOrderDate(java.time.LocalDateTime.now());
             order.setStatus(Order.OrderStatus.PENDING);
+            order.setPaymentStatus("PENDING");
             order.setAddressLine(request.getAddressLine());
             order.setCity(request.getCity());
             order.setState(request.getState());
             order.setPincode(request.getPincode());
+            order.setLatitude(request.getLatitude());
+            order.setLongitude(request.getLongitude());
 
             if (request.getStartDate() != null) {
                 try {
@@ -137,7 +145,13 @@ public class OrderController {
             String email = jwtUtil.getEmailFromToken(token.replace("Bearer ", ""));
             User vendor = userRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("User not found"));
-            return ResponseEntity.ok(orderRepository.findByVendor(vendor));
+            List<Order> orders = orderRepository.findByVendor(vendor);
+            System.out.println("Vendor: " + email + " fetched " + orders.size() + " orders.");
+            for (Order o : orders) {
+                System.out.println(
+                        "Order ID: " + o.getId() + " - Lat: " + o.getLatitude() + ", Lng: " + o.getLongitude());
+            }
+            return ResponseEntity.ok(orders);
         } catch (Exception e) {
             return ResponseEntity.status(401).build();
         }
@@ -151,6 +165,8 @@ public class OrderController {
         private String city;
         private String state;
         private String pincode;
+        private Double latitude;
+        private Double longitude;
         private Double price;
 
         public Long getSubscriptionId() {
@@ -207,6 +223,22 @@ public class OrderController {
 
         public void setPincode(String pincode) {
             this.pincode = pincode;
+        }
+
+        public Double getLatitude() {
+            return latitude;
+        }
+
+        public void setLatitude(Double latitude) {
+            this.latitude = latitude;
+        }
+
+        public Double getLongitude() {
+            return longitude;
+        }
+
+        public void setLongitude(Double longitude) {
+            this.longitude = longitude;
         }
 
         public Double getPrice() {

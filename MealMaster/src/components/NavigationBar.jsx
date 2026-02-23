@@ -3,84 +3,91 @@ import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import "../components/Footer.css"
 import { MdOutlineFoodBank } from "react-icons/md";
 import { LinkContainer } from 'react-router-bootstrap';
 import { useAuth } from '../auth/useAuth';
+import StreakCounter from './StreakCounter';
+import './NavigationBar.css';
 
 function NavigationBar() {
   const { user, logout } = useAuth();
 
   return (
-    <Navbar expand="lg" className="bg-body-tertiary">
-      <Container fluid>
-        <MdOutlineFoodBank size={40} />
+    <Navbar expand="lg" className="bg-white shadow-sm sticky-top py-3">
+      <Container>
         <LinkContainer to="/">
-          <Navbar.Brand>Mealmaster</Navbar.Brand>
+          <Navbar.Brand className="d-flex align-items-center fw-bold text-primary-custom" style={{ fontSize: '1.5rem' }}>
+            <MdOutlineFoodBank size={32} className="me-2" />
+            MealMaster
+          </Navbar.Brand>
         </LinkContainer>
         <Navbar.Toggle aria-controls="navbarScroll" />
         <Navbar.Collapse id="navbarScroll">
           <Nav
-            className="me-auto my-2 my-lg-0"
-            style={{ maxHeight: '100px' }}
+            className="me-auto my-2 my-lg-0 ms-lg-4"
             navbarScroll
           >
             <LinkContainer to="/">
-              <Nav.Link>Home</Nav.Link>
+              <Nav.Link className="fw-medium mx-2">Home</Nav.Link>
             </LinkContainer>
             <LinkContainer to="/subscriptions">
-              <Nav.Link>Subscriptions</Nav.Link>
+              <Nav.Link className="fw-medium mx-2">Subscriptions</Nav.Link>
             </LinkContainer>
-            {user?.role === 'Vendor' ? (
+            {user?.role === 'Vendor' && (
               <>
                 <LinkContainer to="/vendor/subscriptions">
-                  <Nav.Link>My Plans</Nav.Link>
+                  <Nav.Link className="fw-medium mx-2">My Plans</Nav.Link>
                 </LinkContainer>
                 <LinkContainer to="/vendor/orders">
-                  <Nav.Link>Orders</Nav.Link>
+                  <Nav.Link className="fw-medium mx-2">Orders</Nav.Link>
                 </LinkContainer>
               </>
-            ) : null}
-            {user?.role === 'User' ? (
-              <LinkContainer to="/user/dashboard">
-                <Nav.Link>My Dashboard</Nav.Link>
-              </LinkContainer>
-            ) : null}
-            {user?.role === 'Admin' ? (
+            )}
+            {user?.role === 'User' && (
+              <>
+                <LinkContainer to="/user/dashboard">
+                  <Nav.Link className="fw-medium mx-2">My Dashboard</Nav.Link>
+                </LinkContainer>
+                <LinkContainer to="/smart-planner">
+                  <Nav.Link className="fw-medium mx-2 text-primary-custom fw-bold">AI Smart Planner</Nav.Link>
+                </LinkContainer>
+              </>
+            )}
+            {user?.role === 'Admin' && (
               <LinkContainer to="/admin">
-                <Nav.Link>Admin</Nav.Link>
+                <Nav.Link className="fw-medium mx-2">Admin</Nav.Link>
               </LinkContainer>
-            ) : null}
+            )}
             <LinkContainer to="/about-us">
-              <Nav.Link>About</Nav.Link>
+              <Nav.Link className="fw-medium mx-2">About Us</Nav.Link>
             </LinkContainer>
             <LinkContainer to="/contact-us">
-              <Nav.Link>Contact</Nav.Link>
+              <Nav.Link className="fw-medium mx-2">Contact Us</Nav.Link>
             </LinkContainer>
           </Nav>
-          {user ? (
-            <>
-              <div className="me-3">{user.name ? `Hi, ${user.name}` : user.email}</div>
-              <Form className="d-flex">
-                <Button variant="outline-danger" onClick={logout}>
+
+          <div className="d-flex align-items-center gap-3">
+            {user ? (
+              <>
+                <StreakCounter />
+                <div className="fw-medium text-muted">
+                  {user.name ? `Hi, ${user.name}` : user.email}
+                </div>
+                <Button variant="outline-danger" size="sm" onClick={logout} className="rounded-pill px-3">
                   Logout
                 </Button>
-              </Form>
-            </>
-          ) : (
-            <>
-              <Form className="d-flex me-2">
+              </>
+            ) : (
+              <>
                 <LinkContainer to="/login">
-                  <Button variant="outline-success">Login</Button>
+                  <Button variant="outline-primary-custom" className="rounded-pill px-4">Login</Button>
                 </LinkContainer>
-              </Form>
-              <Form className="d-flex">
                 <LinkContainer to="/signup">
-                  <Button variant="outline-success">Sign Up</Button>
+                  <Button variant="primary-custom" className="rounded-pill px-4">Sign Up</Button>
                 </LinkContainer>
-              </Form>
-            </>
-          )}
+              </>
+            )}
+          </div>
         </Navbar.Collapse>
       </Container>
     </Navbar>

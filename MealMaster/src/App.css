@@ -1,40 +1,55 @@
-
-.custom-navbar {
-  background: linear-gradient(90deg, #2A7B9B, #57C785);
+/* Global Layout */
+.main-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.content-wrapper {
+  flex: 1;
+  padding: 2rem 0;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
+/* Card Styles Override */
 .card {
-  padding: 2em;
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  background-color: var(--white);
+  transition: all 0.3s ease;
 }
 
-.read-the-docs {
-  color: #888;
+.card-header {
+  background-color: transparent;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 1.5rem;
+  font-weight: 600;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+.card-footer {
+  background-color: transparent;
+  border-top: 1px solid #e2e8f0;
+  padding: 1.5rem;
+}
+
+/* Form Controls */
+.form-control, .form-select {
+  border-radius: var(--border-radius);
+  border: 1px solid #e2e8f0;
+  padding: 0.75rem 1rem;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.form-label {
+  font-weight: 500;
+  color: var(--dark-text);
+  margin-bottom: 0.5rem;
 }

@@ -1,5 +1,109 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #2563eb;
+  --secondary-color: #64748b;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --danger-color: #ef4444;
+  --light-bg: #f8fafc;
+  --dark-text: #0f172a;
+  --muted-text: #64748b;
+  --white: #ffffff;
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --border-radius: 0.5rem;
+}
+
 body {
   margin: 0;
   padding: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--light-bg);
+  color: var(--dark-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  color: var(--dark-text);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--primary-color);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Utilities */
+.text-primary-custom {
+  color: var(--primary-color) !important;
+}
+
+.bg-primary-custom {
+  background-color: var(--primary-color) !important;
+}
+
+.shadow-custom {
+  box-shadow: var(--card-shadow) !important;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--hover-shadow) !important;
+  transition: all 0.3s ease;
+}
+
+.btn-primary-custom {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-primary-custom:hover {
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.btn-outline-primary-custom {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+  padding: 0.5rem 1.5rem;
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  background-color: transparent;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-primary-custom:hover {
+  background-color: var(--primary-color);
+  color: white;
+}

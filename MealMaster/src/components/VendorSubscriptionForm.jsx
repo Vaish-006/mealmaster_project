@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Button, Col, Container, Form, Row, Spinner } from 'react-bootstrap';
+import { Button, Col, Container, Form, Row, Spinner, Card } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { FaSave, FaArrowLeft, FaUtensils, FaRupeeSign, FaCalendarDay } from 'react-icons/fa';
 import { apiRequest } from '../api/http';
 import { useAuth } from '../auth/useAuth';
 
@@ -38,7 +39,7 @@ export default function VendorSubscriptionForm() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(emptyForm);
 
-  const title = useMemo(() => (isEdit ? 'Update Subscription Plan' : 'Create Subscription Plan'), [isEdit]);
+  const title = useMemo(() => (isEdit ? 'Update Plan' : 'Create New Plan'), [isEdit]);
 
   useEffect(() => {
     if (!isEdit) return;
@@ -114,10 +115,10 @@ export default function VendorSubscriptionForm() {
     try {
       if (isEdit) {
         await apiRequest(`/subscriptions/${id}`, { method: 'PUT', token: user.token, body: payload });
-        toast.success('Subscription updated');
+        toast.success('Subscription updated successfully');
       } else {
         await apiRequest('/subscriptions', { method: 'POST', token: user.token, body: payload });
-        toast.success('Subscription created');
+        toast.success('Subscription created successfully');
       }
       navigate('/vendor/subscriptions');
     } catch (err) {
@@ -130,127 +131,191 @@ export default function VendorSubscriptionForm() {
   if (loading) {
     return (
       <Container className="py-5 d-flex justify-content-center">
-        <Spinner />
+        <Spinner animation="border" variant="primary-custom" />
       </Container>
     );
   }
 
   return (
-    <Container style={{ maxWidth: 720 }} className="mt-4 mb-5">
-      <h3 className="mb-3 text-center">{title}</h3>
+    <Container className="py-5 mb-5">
+      <Row className="justify-content-center">
+        <Col lg={10} xl={8}>
+          <div className="d-flex align-items-center mb-4">
+            <Button variant="light" className="rounded-circle p-2 me-3 text-muted" onClick={() => navigate('/vendor/subscriptions')}>
+              <FaArrowLeft />
+            </Button>
+            <div>
+              <h2 className="fw-bold mb-0">{title}</h2>
+              <p className="text-muted mb-0">Fill in the details for your meal plan</p>
+            </div>
+          </div>
 
-      <Form onSubmit={handleSubmit}>
-        <Form.Group className="mb-3">
-          <Form.Label>Subscription Name</Form.Label>
-          <Form.Control value={form.name} onChange={updateField('name')} type="text" placeholder="Enter plan name" />
-        </Form.Group>
+          <Card className="border-0 shadow-sm rounded-4 overflow-hidden">
+            <Card.Body className="p-4 p-md-5">
+              <Form onSubmit={handleSubmit}>
+                
+                {/* Basic Info */}
+                <h5 className="fw-bold mb-4 text-primary-custom d-flex align-items-center">
+                  <FaUtensils className="me-2" /> Basic Information
+                </h5>
+                <Row className="g-3 mb-4">
+                  <Col md={12}>
+                    <Form.Group>
+                      <Form.Label>Plan Name</Form.Label>
+                      <Form.Control 
+                        value={form.name} 
+                        onChange={updateField('name')} 
+                        type="text" 
+                        placeholder="e.g. Healthy Keto Plan" 
+                        className="rounded-3 shadow-sm py-2"
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={12}>
+                    <Form.Group>
+                      <Form.Label>Description</Form.Label>
+                      <Form.Control 
+                        value={form.description} 
+                        onChange={updateField('description')} 
+                        as="textarea" 
+                        rows={3} 
+                        placeholder="Describe your meal plan..." 
+                        className="rounded-3 shadow-sm py-2"
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group>
+                      <Form.Label>City</Form.Label>
+                      <Form.Control 
+                        value={form.city} 
+                        onChange={updateField('city')} 
+                        type="text" 
+                        placeholder="e.g. Pune" 
+                        className="rounded-3 shadow-sm py-2"
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group>
+                      <Form.Label>Diet Type</Form.Label>
+                      <Form.Select 
+                        value={form.planType} 
+                        onChange={updateField('planType')}
+                        className="rounded-3 shadow-sm py-2"
+                      >
+                        <option value="Veg">Vegetarian</option>
+                        <option value="Non-Veg">Non-Vegetarian</option>
+                        <option value="Mix">Mixed</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                  <Col md={12}>
+                    <Form.Group>
+                      <Form.Label>Cover Image URL</Form.Label>
+                      <Form.Control 
+                        value={form.imageUrl} 
+                        onChange={updateField('imageUrl')} 
+                        type="url" 
+                        placeholder="https://example.com/image.jpg" 
+                        className="rounded-3 shadow-sm py-2"
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Description</Form.Label>
-          <Form.Control value={form.description} onChange={updateField('description')} as="textarea" rows={2} placeholder="Enter description" />
-        </Form.Group>
+                <hr className="my-5 text-muted opacity-25" />
 
-        <Row className="g-3">
-          <Col md={6}>
-            <Form.Group className="mb-3">
-              <Form.Label>City</Form.Label>
-              <Form.Control value={form.city} onChange={updateField('city')} type="text" placeholder="Enter city" />
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group className="mb-3">
-              <Form.Label>Plan Type</Form.Label>
-              <Form.Select value={form.planType} onChange={updateField('planType')}>
-                <option value="Veg">Veg</option>
-                <option value="Non-Veg">Non-Veg</option>
-                <option value="Mix">Mix</option>
-              </Form.Select>
-            </Form.Group>
-          </Col>
-        </Row>
+                {/* Pricing */}
+                <h5 className="fw-bold mb-4 text-primary-custom d-flex align-items-center">
+                  <FaRupeeSign className="me-2" /> Pricing Plans
+                </h5>
+                <Row className="g-3 mb-4">
+                  <Col md={4}>
+                    <Form.Group>
+                      <Form.Label>7 Days</Form.Label>
+                      <Form.Control 
+                        value={form.price7} 
+                        onChange={updateField('price7')} 
+                        type="number" 
+                        min="0" 
+                        step="0.01" 
+                        placeholder="₹ 0.00" 
+                        className="rounded-3 shadow-sm py-2"
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
+                    <Form.Group>
+                      <Form.Label>15 Days</Form.Label>
+                      <Form.Control 
+                        value={form.price15} 
+                        onChange={updateField('price15')} 
+                        type="number" 
+                        min="0" 
+                        step="0.01" 
+                        placeholder="₹ 0.00" 
+                        className="rounded-3 shadow-sm py-2"
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
+                    <Form.Group>
+                      <Form.Label>30 Days</Form.Label>
+                      <Form.Control 
+                        value={form.price30} 
+                        onChange={updateField('price30')} 
+                        type="number" 
+                        min="0" 
+                        step="0.01" 
+                        placeholder="₹ 0.00" 
+                        className="rounded-3 shadow-sm py-2"
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Food Image URL</Form.Label>
-          <Form.Control value={form.imageUrl} onChange={updateField('imageUrl')} type="text" placeholder="https://example.com/image.jpg" />
-        </Form.Group>
+                <hr className="my-5 text-muted opacity-25" />
 
-        <h5 className="mt-4">Pricing</h5>
-        <Row className="g-3">
-          <Col md={4}>
-            <Form.Group className="mb-2">
-              <Form.Label>7-Day</Form.Label>
-              <Form.Control value={form.price7} onChange={updateField('price7')} type="number" min="0" step="0.01" placeholder="Price" />
-            </Form.Group>
-          </Col>
-          <Col md={4}>
-            <Form.Group className="mb-2">
-              <Form.Label>15-Day</Form.Label>
-              <Form.Control value={form.price15} onChange={updateField('price15')} type="number" min="0" step="0.01" placeholder="Price" />
-            </Form.Group>
-          </Col>
-          <Col md={4}>
-            <Form.Group className="mb-2">
-              <Form.Label>30-Day</Form.Label>
-              <Form.Control value={form.price30} onChange={updateField('price30')} type="number" min="0" step="0.01" placeholder="Price" />
-            </Form.Group>
-          </Col>
-        </Row>
+                {/* Weekly Menu */}
+                <h5 className="fw-bold mb-4 text-primary-custom d-flex align-items-center">
+                  <FaCalendarDay className="me-2" /> Weekly Menu (Example)
+                </h5>
+                <Row className="g-3">
+                  {[1, 2, 3, 4, 5, 6, 7].map((day) => (
+                    <Col md={day === 7 ? 12 : 6} key={day}>
+                      <Form.Group>
+                        <Form.Label className="text-muted small fw-bold text-uppercase">Day {day}</Form.Label>
+                        <Form.Control 
+                          value={form[`day${day}`]} 
+                          onChange={updateField(`day${day}`)} 
+                          type="text" 
+                          placeholder={`Menu for Day ${day}`} 
+                          className="rounded-3 shadow-sm py-2"
+                        />
+                      </Form.Group>
+                    </Col>
+                  ))}
+                </Row>
 
-        <h5 className="mt-4">Meals (7 Days)</h5>
-        <Row className="g-3">
-          <Col md={6}>
-            <Form.Group className="mb-2">
-              <Form.Label>Day 1</Form.Label>
-              <Form.Control value={form.day1} onChange={updateField('day1')} type="text" placeholder="Enter details" />
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group className="mb-2">
-              <Form.Label>Day 2</Form.Label>
-              <Form.Control value={form.day2} onChange={updateField('day2')} type="text" placeholder="Enter details" />
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group className="mb-2">
-              <Form.Label>Day 3</Form.Label>
-              <Form.Control value={form.day3} onChange={updateField('day3')} type="text" placeholder="Enter details" />
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group className="mb-2">
-              <Form.Label>Day 4</Form.Label>
-              <Form.Control value={form.day4} onChange={updateField('day4')} type="text" placeholder="Enter details" />
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group className="mb-2">
-              <Form.Label>Day 5</Form.Label>
-              <Form.Control value={form.day5} onChange={updateField('day5')} type="text" placeholder="Enter details" />
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group className="mb-2">
-              <Form.Label>Day 6</Form.Label>
-              <Form.Control value={form.day6} onChange={updateField('day6')} type="text" placeholder="Enter details" />
-            </Form.Group>
-          </Col>
-          <Col md={12}>
-            <Form.Group className="mb-3">
-              <Form.Label>Day 7</Form.Label>
-              <Form.Control value={form.day7} onChange={updateField('day7')} type="text" placeholder="Enter details" />
-            </Form.Group>
-          </Col>
-        </Row>
-
-        <div className="d-flex justify-content-between">
-          <Button variant="secondary" type="button" onClick={() => navigate('/vendor/subscriptions')}>
-            Cancel
-          </Button>
-          <Button variant={isEdit ? 'warning' : 'success'} type="submit" disabled={saving}>
-            {saving ? 'Saving...' : isEdit ? 'Update Plan' : 'Submit'}
-          </Button>
-        </div>
-      </Form>
+                <div className="d-flex justify-content-end gap-3 mt-5 pt-3 border-top">
+                  <Button variant="light" className="rounded-pill px-4" onClick={() => navigate('/vendor/subscriptions')}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    variant="primary-custom" 
+                    type="submit" 
+                    className="rounded-pill px-4 fw-bold shadow-sm"
+                    disabled={saving}
+                  >
+                    {saving ? <><Spinner size="sm" className="me-2"/> Saving...</> : <><FaSave className="me-2"/> {isEdit ? 'Update Plan' : 'Publish Plan'}</>}
+                  </Button>
+                </div>
+              </Form>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
     </Container>
   );
 }

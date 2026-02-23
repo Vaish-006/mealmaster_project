@@ -36,6 +36,11 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/orders/**").permitAll()
                         .requestMatchers("/api/admin/**").permitAll()
+                        .requestMatchers("/api/reviews/**", "/api/reviews").permitAll()
+                        .requestMatchers("/api/uploads/**", "/api/uploads").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
+                        .requestMatchers("/api/ai/**").permitAll()
+                        .requestMatchers("/api/gamification/**").permitAll()
                         .anyRequest().authenticated());
         return http.build();
     }

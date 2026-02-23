@@ -17,10 +17,12 @@ import VendorSubscriptionForm from './components/VendorSubscriptionForm.jsx';
 import VendorOrders from './components/VendorOrders.jsx';
 import AdminDashboard from './components/AdminDashboard.jsx';
 import ContactUs from './components/ContactUs.jsx';
+import NotFound from './components/NotFound.jsx';
+import SmartPlanner from './components/SmartPlanner.jsx';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       {/* Main layout container */}
       <div className="d-flex flex-column min-vh-100">
         <NavigationBar />
@@ -40,6 +42,7 @@ function App() {
 
             <Route element={<RequireAuth roles={['User']} />}>
               <Route path="/user/dashboard" element={<UserDashboard />} />
+              <Route path="/smart-planner" element={<SmartPlanner />} />
             </Route>
 
             <Route element={<RequireAuth roles={['Vendor']} />}>
@@ -52,6 +55,8 @@ function App() {
             <Route element={<RequireAuth roles={['Admin']} />}>
               <Route path="/admin" element={<AdminDashboard />} />
             </Route>
+
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
 
