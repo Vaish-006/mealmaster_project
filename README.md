@@ -211,7 +211,7 @@ The APIs were tested using Postman to verify:
 
 **Vaishnavi Pardeshi**
 
-* Email: [vaishnavipardeshi06@gmail.com](mailto:your-vaishnavipardeshi06@gmail.com)
+* Email: [vaishnavipardeshi06@gmail.com](mailto:vaishnavipardeshi06@gmail.com)
 * LinkedIn: www.linkedin.com/in/vaishnavi-pardeshi-641556223
 * GitHub: https://github.com/Vaish-006
 
